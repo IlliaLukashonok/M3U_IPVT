@@ -20,6 +20,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    fileProcessing.h \
     mainwindow.h
 
 FORMS += \

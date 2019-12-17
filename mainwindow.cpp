@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "fileProcessing.h"
 #include <QtWidgets>
 #include <QDialog>
+
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -17,7 +19,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_File_triggered()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-													  "/home",
-													  tr("All (*.*)"));
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"),
+													   "e:\\iptv",
+													   tr("m3u (*.m3u*)"));
+	QFile myFile(filePath);
+	myFile.open(QIODevice::ReadOnly);
+	QByteArray block = myFile.readAll();
+	ui->plainTextEdit->setPlainText(block);
+	myFile.close();
 }
