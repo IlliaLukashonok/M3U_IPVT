@@ -22,7 +22,7 @@ void MainWindow::processFile(QString filePath)
 			   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
 			   `Number` INTEGER,\
 			   `Name`	TEXT NOT NULL,\
-			   `Group`	TEXT NOT NULL,\
+			   `Gr`	TEXT NOT NULL,\
 			   `URL` TEXT NOT NULL\
 			   )");
 
@@ -32,24 +32,34 @@ void MainWindow::processFile(QString filePath)
 	int strNumber = 0; //Line number;                         x
 	int chanNumber = 0; //Channel number;                     y
 	int strChanNumber = 0; //Number of line in channel block; z
-	ui->plainTextEdit.plainText("Hi");
-	while (!myFile.atEnd()) {
+
+	ui->plainTextEdit->setPlainText("HI");
 
 	QString str = myFile.readLine();
+	QString startStr = nullptr;
+	QString chName = nullptr;
+	QString chGroup = nullptr;
+	QString chUrl = nullptr;
+	QString	strDb = nullptr;
+
+
+	while (!myFile.atEnd())
+
+	{
 
 	if (str.contains("#EXTM3U")) //Если есть первая строка
 	{
-		QString startStr = str.remove("#EXTM3U");
-		startStr = startStr.remove("\n");
+		startStr = str.remove("#EXTM3U");
+		startStr = startStr.remove("\r\n");
 		strNumber++;
 	}
 
-	if (str.contains("#EXTINF")) //Узнаем имя
+	else if (str.contains("#EXTINF")) //Узнаем имя
 	{
 		int *pos = new int;
 		*pos = str.indexOf(',');
-		QString chName = str.remove(0, *pos);
-//		chName = chName.remove('\n');
+		chName = str.remove(0, *pos + 1);
+		chName = chName.remove("\r\n");
 		delete pos;
 		strNumber++;
 		chanNumber++;
@@ -57,22 +67,34 @@ void MainWindow::processFile(QString filePath)
 	}
 	else if (str.contains("#EXTGRP:"))
 	{
-		QString chGroup = str.remove("#EXTGRP:");
+		chGroup = str.remove("#EXTGRP:");
+		chGroup = chGroup.remove("\r\n");
 		strNumber++;
 		strChanNumber++;
 	}
 	else if (str.contains("http"))
 	{
-	QString urlStr = str;
+	chUrl = str;
+	chUrl = chUrl.remove("\r\n");
 	strNumber++;
 	strChanNumber = 0;
 	}
 
 	if (strChanNumber == 0 && chanNumber != 0)
 	{
-		QSqlQuery query;
-		query.exec("INSERT INTO First (Number, Name, Group, URL) VALUES(chanNumber, chName, chGroup, urlStr);");
+		QString strF =
+				  "INSERT INTO  First (Number, Name, Gr, URL) "
+				  "VALUES(%1, '%2', '%3', '%4');";
+
+			strDb = strF.arg(chanNumber)
+					  .arg(chName)
+					  .arg(chGroup)
+					  .arg(chUrl);
+			if (!query.exec(strDb)) {
+				qDebug() << "Unable to do insert opeation";
+			}
 	}
+	str = myFile.readLine();
 	}
 	myFile.close();
 }
