@@ -47,7 +47,7 @@
   </widget>
   <action name="actionOpen_File">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Open File</string>
