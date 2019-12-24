@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QFile>
 #include <QtSql>
+#include <QMessageBox>
 
 void MainWindow::processFile(QString filePath)
 {
@@ -18,13 +19,27 @@ void MainWindow::processFile(QString filePath)
 		}
 
 	QSqlQuery query;
-	query.exec("CREATE TABLE `First` (\
-			   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
-			   `Number` INTEGER,\
-			   `Name`	TEXT NOT NULL,\
-			   `Gr`	TEXT NOT NULL,\
-			   `URL` TEXT NOT NULL\
-			   )");
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this, QString::fromUtf8("Сообщение"),
+						  QString::fromUtf8("Drop table?"),
+						  QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes)
+	{
+		query.exec("DROP TABLE First");
+		query.exec("CREATE TABLE `First` (\
+											   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
+											   `Number` INTEGER,\
+											   `Name`	TEXT NOT NULL,\
+											   `Gr`	TEXT NOT NULL,\
+											   `URL` TEXT NOT NULL\
+											   )");
+	}
+	else
+	{
+
+	}
+
 
 	QFile myFile (filePath);
 	myFile.open(QIODevice::ReadOnly);
@@ -46,7 +61,7 @@ void MainWindow::processFile(QString filePath)
 	while (!myFile.atEnd())
 
 	{
-
+	str = str.simplified();
 	if (str.contains("#EXTM3U")) //Если есть первая строка
 	{
 		startStr = str.remove("#EXTM3U");
@@ -59,7 +74,7 @@ void MainWindow::processFile(QString filePath)
 		int *pos = new int;
 		*pos = str.indexOf(',');
 		chName = str.remove(0, *pos + 1);
-		chName = chName.remove("\r\n");
+		chName = chName.remove('\'');
 		delete pos;
 		strNumber++;
 		chanNumber++;
@@ -97,6 +112,7 @@ void MainWindow::processFile(QString filePath)
 	str = myFile.readLine();
 	}
 	myFile.close();
+	ui->plainTextEdit->setPlainText("Finish");
 }
 
 #endif // FILEPROCESSING_H
