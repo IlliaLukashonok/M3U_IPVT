@@ -1,58 +1,49 @@
-#ifndef FILEPROCESSING_H
-#define FILEPROCESSING_H
+#include "DBusing.h"
 
-#include "mainwindow.h"
-
-#include <QMainWindow>
-#include <QFile>
-#include <QtSql>
-#include <QMessageBox>
-
-void MainWindow::processFile_Intodb(QString filePath)
+void openDB()//Как открывем базу
 {
-	QSqlDatabase db;
 	db = QSqlDatabase::addDatabase("QSQLITE");
-
-	if (!db.isOpen())
-	{
-		db.setDatabaseName("database.db3");
-	}
-	else
-	{
-		db.close();
-		db.setDatabaseName("database.db3");
-	}
+	db.setDatabaseName("database.db3");
 
 	if (!db.open())
 	{
-			qDebug() << "Что-то не так с соединением!";
+			qDebug() << "Что-то не так с соединением!1";
 	}
 
 	QSqlQuery query;
 
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this, QString::fromUtf8("Сообщение"),
-						  QString::fromUtf8("Drop table?"),
-						  QMessageBox::Yes | QMessageBox::No);
-	if (reply == QMessageBox::Yes)
-	{
-		query.exec("DROP TABLE First");
-		query.exec("CREATE TABLE `First` (\
-											   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
-											   `Number` INTEGER,\
-											   `Name`	TEXT NOT NULL,\
-											   `Gr`	TEXT NOT NULL,\
-											   `URL` TEXT NOT NULL\
-											   )");
-	}
-	else
-	{
+	query.exec("CREATE TABLE IF NOT EXISTS `First` (\
+										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
+										   `Number` INTEGER,\
+										   `Name`	TEXT NOT NULL,\
+										   `Gr`	TEXT NOT NULL,\
+										   `URL` TEXT NOT NULL\
+										   )");
+}
 
-	}
-
+void MainWindow::processFile_Intodb(QString filePath)
+{
 
 	QFile myFile (filePath);
 	myFile.open(QIODevice::ReadOnly);
+
+	QSqlQuery query;
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this, QString::fromUtf8("Вопрос"),
+						  QString::fromUtf8("Очистить таблицу?"),
+						  QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes)
+		{
+		query.exec("DROP TABLE First");
+		query.exec("CREATE TABLE `First` (\
+										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
+										   `Number` INTEGER,\
+										   `Name`	TEXT NOT NULL,\
+										   `Gr`	TEXT NOT NULL,\
+										   `URL` TEXT NOT NULL\
+										   )");
+		}
 
 	int strNumber = 0; //Line number;                         x
 	int chanNumber = 0; //Channel number;                     y
@@ -124,6 +115,3 @@ void MainWindow::processFile_Intodb(QString filePath)
 	myFile.close();
 	ui->plainTextEdit->setPlainText("Finish");
 }
-
-#endif // FILEPROCESSING_H
-

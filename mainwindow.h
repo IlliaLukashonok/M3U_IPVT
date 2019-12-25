@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtSql>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +16,7 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 	void processFile_Intodb(QString filePath);
-	void formdbToFile();
+	void fromdbToFile();
 
 private slots:
 
