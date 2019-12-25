@@ -14,7 +14,8 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
-	void processFile(QString filePath);
+	void processFile_Intodb(QString filePath);
+	void formdbToFile();
 
 private slots:
 

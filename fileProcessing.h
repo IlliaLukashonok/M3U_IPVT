@@ -8,15 +8,25 @@
 #include <QtSql>
 #include <QMessageBox>
 
-void MainWindow::processFile(QString filePath)
+void MainWindow::processFile_Intodb(QString filePath)
 {
 	QSqlDatabase db;
 	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName("database.db3");
 
-	if (!db.open()) {
+	if (!db.isOpen())
+	{
+		db.setDatabaseName("database.db3");
+	}
+	else
+	{
+		db.close();
+		db.setDatabaseName("database.db3");
+	}
+
+	if (!db.open())
+	{
 			qDebug() << "Что-то не так с соединением!";
-		}
+	}
 
 	QSqlQuery query;
 
@@ -48,7 +58,7 @@ void MainWindow::processFile(QString filePath)
 	int chanNumber = 0; //Channel number;                     y
 	int strChanNumber = 0; //Number of line in channel block; z
 
-	ui->plainTextEdit->setPlainText("HI");
+	ui->plainTextEdit->setPlainText("Start");
 
 	QString str = myFile.readLine();
 	QString startStr = nullptr;
