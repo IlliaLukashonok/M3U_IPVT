@@ -16,11 +16,13 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 	void processFile_Intodb(QString filePath);
-	void fromdbToFile();
+	void fromdbToFile(QString filePath);
 
 private slots:
 
 	void on_actionOpen_File_triggered();
+
+	void on_actionSave_As_triggered();
 
 private:
 	Ui::MainWindow *ui;

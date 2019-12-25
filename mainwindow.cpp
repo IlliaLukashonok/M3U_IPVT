@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "fileProcessing.h"
+#include "DBusing.h"
 #include <QtWidgets>
 #include <QDialog>
 
@@ -24,6 +24,13 @@ void MainWindow::on_actionOpen_File_triggered()
 													   "e:\\iptv",
 													   tr("m3u (*.m3u*)"));
 	processFile_Intodb(filePath);
-	fromdbToFile();
 
+}
+
+void MainWindow::on_actionSave_As_triggered()
+{
+	QString savePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+													"e:\\iptv\\untitled.m3u",
+													tr("m3u (*.m3u*)"));
+	fromdbToFile(savePath);
 }

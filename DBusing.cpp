@@ -1,5 +1,7 @@
 #include "DBusing.h"
 
+static QString startStr = nullptr;
+
 void openDB()//Как открывем базу
 {
 	db = QSqlDatabase::addDatabase("QSQLITE");
@@ -51,8 +53,8 @@ void MainWindow::processFile_Intodb(QString filePath)
 
 	ui->plainTextEdit->setPlainText("Start");
 
-	QString str = myFile.readLine();
-	QString startStr = nullptr;
+//	QString str = myFile.readLine();
+	QString str = nullptr;
 	QString chName = nullptr;
 	QString chGroup = nullptr;
 	QString chUrl = nullptr;
@@ -60,8 +62,8 @@ void MainWindow::processFile_Intodb(QString filePath)
 
 
 	while (!myFile.atEnd())
-
 	{
+	str = myFile.readLine();
 	str = str.simplified();
 	if (str.contains("#EXTM3U")) //Если есть первая строка
 	{
@@ -110,8 +112,45 @@ void MainWindow::processFile_Intodb(QString filePath)
 				qDebug() << "Unable to do insert opeation";
 			}
 	}
-	str = myFile.readLine();
+
 	}
 	myFile.close();
 	ui->plainTextEdit->setPlainText("Finish");
+}
+
+void MainWindow::fromdbToFile(QString filePath)
+{
+	QSqlQuery query;
+
+	QFile myFile (filePath);
+	QTextStream stream;
+
+	myFile.open(QIODevice::WriteOnly);
+
+	stream.setDevice(&myFile); // Подключение потока к файлу
+
+	stream << "#EXTM3U" << startStr << "\r\n";
+
+	if (!query.exec("SELECT * FROM First;")) {
+			qDebug() << "Unable to execute query - exiting";
+		}
+
+	//Reading of the data
+	QSqlRecord rec     = query.record();
+	QString    chNumber = nullptr;
+	QString    chName = nullptr;
+	QString    chGroup = nullptr;
+	QString    chUrl = nullptr;
+
+	while (query.next())
+	{
+		chNumber  = query.value(rec.indexOf("Number")).toString();
+		chName  = query.value(rec.indexOf("Name")).toString();
+		chGroup = query.value(rec.indexOf("Gr")).toString();
+		chUrl = query.value(rec.indexOf("URL")).toString();
+		stream << "#EXTINF:0," << chName << "\n"
+			   << "#EXTGRP:" << chGroup << "\r\n"
+			   <<  chUrl << "\r\n";
+	}
+	myFile.close();
 }
