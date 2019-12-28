@@ -5,7 +5,8 @@ static QString startStr = nullptr;
 void openDB()//Как открывем базу
 {
 	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName("database.db3");
+    //startStr = ;
+    db.setDatabaseName("database.db3");
 
 	if (!db.open())
 	{
@@ -23,10 +24,12 @@ void openDB()//Как открывем базу
 										   )");
 }
 
+
+/*Обрабатывает базу в файл*/
 void MainWindow::processFile_Intodb(QString filePath)
 {
 
-	QFile myFile (filePath);
+    QFile myFile (filePath);
 	myFile.open(QIODevice::ReadOnly);
 
 	QSqlQuery query;
@@ -122,8 +125,9 @@ void MainWindow::fromdbToFile(QString filePath)
 {
 	QSqlQuery query;
 
-	QFile myFile (filePath);
+    QFile myFile (filePath);
 	QTextStream stream;
+
 
 	myFile.open(QIODevice::WriteOnly);
 
@@ -137,20 +141,23 @@ void MainWindow::fromdbToFile(QString filePath)
 
 	//Reading of the data
 	QSqlRecord rec     = query.record();
-	QString    chNumber = nullptr;
+    QString    chNumber = nullptr;
 	QString    chName = nullptr;
 	QString    chGroup = nullptr;
 	QString    chUrl = nullptr;
 
 	while (query.next())
 	{
-		chNumber  = query.value(rec.indexOf("Number")).toString();
+        chNumber = query.value(rec.indexOf("Number")).toString();
 		chName  = query.value(rec.indexOf("Name")).toString();
 		chGroup = query.value(rec.indexOf("Gr")).toString();
 		chUrl = query.value(rec.indexOf("URL")).toString();
-		stream << "#EXTINF:0," << chName << "\n"
-			   << "#EXTGRP:" << chGroup << "\r\n"
-			   <<  chUrl << "\r\n";
+        stream.setCodec("UTF-8");
+        stream.setGenerateByteOrderMark(false);
+        stream << "#EXTINF:0 tv-chno=\"" <<  chNumber<< "\","
+               << chName << "\n"
+               << "#EXTGRP:" << chGroup << "\r\n"
+               <<  chUrl << "\r\n";
 	}
 	myFile.close();
 }

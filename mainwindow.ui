@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>M3UPlaylistEditor</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Oxygen-Icons.org-Oxygen-Status-media-playlist-repeat.ico</normaloff>Oxygen-Icons.org-Oxygen-Status-media-playlist-repeat.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPlainTextEdit" name="plainTextEdit">
@@ -20,7 +24,7 @@
       <x>10</x>
       <y>10</y>
       <width>781</width>
-      <height>481</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="plainText">
@@ -44,11 +48,18 @@
     <addaction name="actionOpen_File"/>
     <addaction name="actionSave_As"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen_File">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Open File</string>
@@ -56,10 +67,15 @@
   </action>
   <action name="actionSave_As">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

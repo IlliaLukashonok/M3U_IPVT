@@ -8,7 +8,7 @@
 #include "ui_mainwindow.h"
 
 #include <QMainWindow>
-#include <QFile.h>
+#include <QFile>
 #include <QtSql>
 #include <QMessageBox>
 
