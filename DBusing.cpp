@@ -5,7 +5,6 @@ static QString startStr = nullptr;
 void openDB()//Как открывем базу
 {
 	db = QSqlDatabase::addDatabase("QSQLITE");
-    //startStr = ;
     db.setDatabaseName("database.db3");
 
 	if (!db.open())
@@ -154,7 +153,7 @@ void MainWindow::fromdbToFile(QString filePath)
 		chUrl = query.value(rec.indexOf("URL")).toString();
         stream.setCodec("UTF-8");
         stream.setGenerateByteOrderMark(false);
-        stream << "#EXTINF:0 tv-chno=\"" <<  chNumber<< "\","
+        stream << "#EXTINF:-1 tvg-chno=\"" <<  chNumber<< "\","
                << chName << "\n"
                << "#EXTGRP:" << chGroup << "\r\n"
                <<  chUrl << "\r\n";
