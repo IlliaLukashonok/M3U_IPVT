@@ -17,6 +17,7 @@ public:
 	~MainWindow();
 	void processFile_Intodb(QString filePath);
 	void fromdbToFile(QString filePath);
+    void baseToTable();
 
 private slots:
 

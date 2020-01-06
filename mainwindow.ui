@@ -22,13 +22,23 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>470</y>
       <width>781</width>
       <height>31</height>
      </rect>
     </property>
     <property name="plainText">
      <string/>
+    </property>
+   </widget>
+   <widget class="QTableView" name="tableDb">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>781</width>
+      <height>451</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -38,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

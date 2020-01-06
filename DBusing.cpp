@@ -12,17 +12,32 @@ void openDB()//Как открывем базу
 			qDebug() << "Что-то не так с соединением!1";
 	}
 
-	QSqlQuery query;
+    QSqlQuery *query = new QSqlQuery;
 
-	query.exec("CREATE TABLE IF NOT EXISTS `First` (\
+    query->exec("CREATE TABLE IF NOT EXISTS `First` (\
 										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
 										   `Number` INTEGER,\
 										   `Name`	TEXT NOT NULL,\
 										   `Gr`	TEXT NOT NULL,\
 										   `URL` TEXT NOT NULL\
 										   )");
+    delete query;
 }
 
+void MainWindow::baseToTable()
+{
+    QSqlQueryModel *model = new QSqlQueryModel;
+    QSqlQuery *query = new QSqlQuery(db);
+
+    query->prepare("SELECT * FROM First");
+    query->exec();
+
+    model->setQuery(*query);
+
+    ui->tableDb->setModel(model);
+
+    //QDebug() << (model->rowCount());
+}
 
 /*Обрабатывает базу в файл*/
 void MainWindow::processFile_Intodb(QString filePath)
@@ -31,7 +46,7 @@ void MainWindow::processFile_Intodb(QString filePath)
     QFile myFile (filePath);
 	myFile.open(QIODevice::ReadOnly);
 
-	QSqlQuery query;
+    QSqlQuery *query = new QSqlQuery;
 
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this, QString::fromUtf8("Вопрос"),
@@ -39,8 +54,8 @@ void MainWindow::processFile_Intodb(QString filePath)
 						  QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)
 		{
-		query.exec("DROP TABLE First");
-		query.exec("CREATE TABLE `First` (\
+        query->exec("DROP TABLE First");
+        query->exec("CREATE TABLE `First` (\
 										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
 										   `Number` INTEGER,\
 										   `Name`	TEXT NOT NULL,\
@@ -110,19 +125,21 @@ void MainWindow::processFile_Intodb(QString filePath)
 					  .arg(chName)
 					  .arg(chGroup)
 					  .arg(chUrl);
-			if (!query.exec(strDb)) {
+            if (!query->exec(strDb)) {
 				qDebug() << "Unable to do insert opeation";
 			}
 	}
 
 	}
 	myFile.close();
+    delete query;
+    baseToTable();
 	ui->plainTextEdit->setPlainText("Finish");
 }
 
 void MainWindow::fromdbToFile(QString filePath)
 {
-	QSqlQuery query;
+    QSqlQuery *query = new QSqlQuery;
 
     QFile myFile (filePath);
 	QTextStream stream;
@@ -134,23 +151,23 @@ void MainWindow::fromdbToFile(QString filePath)
 
 	stream << "#EXTM3U" << startStr << "\r\n";
 
-	if (!query.exec("SELECT * FROM First;")) {
+    if (!query->exec("SELECT * FROM First;")) {
 			qDebug() << "Unable to execute query - exiting";
 		}
 
 	//Reading of the data
-	QSqlRecord rec     = query.record();
+    QSqlRecord rec     = query->record();
     QString    chNumber = nullptr;
 	QString    chName = nullptr;
 	QString    chGroup = nullptr;
 	QString    chUrl = nullptr;
 
-	while (query.next())
+    while (query->next())
 	{
-        chNumber = query.value(rec.indexOf("Number")).toString();
-		chName  = query.value(rec.indexOf("Name")).toString();
-		chGroup = query.value(rec.indexOf("Gr")).toString();
-		chUrl = query.value(rec.indexOf("URL")).toString();
+        chNumber = query->value(rec.indexOf("Number")).toString();
+        chName  = query->value(rec.indexOf("Name")).toString();
+        chGroup = query->value(rec.indexOf("Gr")).toString();
+        chUrl = query->value(rec.indexOf("URL")).toString();
         stream.setCodec("UTF-8");
         stream.setGenerateByteOrderMark(false);
         stream << "#EXTINF:-1 tvg-chno=\"" <<  chNumber<< "\","
@@ -159,4 +176,5 @@ void MainWindow::fromdbToFile(QString filePath)
                <<  chUrl << "\r\n";
 	}
 	myFile.close();
+    delete query;
 }
