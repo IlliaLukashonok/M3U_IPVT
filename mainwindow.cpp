@@ -17,6 +17,12 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+/*void MainWindow::statBarState()
+{
+    //QLabel *stateBar = new QLabel(this);
+
+    ui->statusBar->showMessage( tr("Ready"), 2000 );
+}*/
 
 void MainWindow::on_actionOpen_File_triggered()
 {
@@ -45,3 +51,4 @@ ______   /   /          /   /    \\___ \\\n\
 ____    /   /______    /   /    ______)  |\n\
 ___    /__________/   /___/    /________/\n");
 }
+

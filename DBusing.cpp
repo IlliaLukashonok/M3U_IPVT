@@ -1,4 +1,5 @@
 #include "DBusing.h"
+#include "windows.h"
 
 static QString startStr = nullptr;
 
@@ -36,6 +37,7 @@ void MainWindow::baseToTable()
 
     ui->tableDb->setModel(model);
 
+    ui->statusBar->showMessage( tr("Table ready"), 2000 ); //Shit
     //QDebug() << (model->rowCount());
 }
 
@@ -43,6 +45,7 @@ void MainWindow::baseToTable()
 void MainWindow::processFile_Intodb(QString filePath)
 {
 
+    ui->statusBar->showMessage( tr("Start"), 1000 );
     QFile myFile (filePath);
 	myFile.open(QIODevice::ReadOnly);
 
@@ -63,12 +66,12 @@ void MainWindow::processFile_Intodb(QString filePath)
 										   `URL` TEXT NOT NULL\
 										   )");
 		}
-
+    ui->statusBar->showMessage( tr("Base ready"), 1000 );
+    Sleep(1000);
+    ui->statusBar->showMessage( tr("Start processing file"), 2000);
 	int strNumber = 0; //Line number;                         x
 	int chanNumber = 0; //Channel number;                     y
 	int strChanNumber = 0; //Number of line in channel block; z
-
-	ui->plainTextEdit->setPlainText("Start");
 
 //	QString str = myFile.readLine();
 	QString str = nullptr;
@@ -131,10 +134,13 @@ void MainWindow::processFile_Intodb(QString filePath)
 	}
 
 	}
+    ui->statusBar->showMessage( tr("Processing end"), 1000 );
+    ui->statusBar->showMessage( tr("Base is fill"), 1000);
 	myFile.close();
     delete query;
     baseToTable();
-	ui->plainTextEdit->setPlainText("Finish");
+    ui->statusBar->showMessage( tr("Ready"), 2000);
+//	ui->plainTextEdit->setPlainText("Finish");
 }
 
 void MainWindow::fromdbToFile(QString filePath)
