@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QtSql>
-#include <dos.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,7 +18,6 @@ public:
 	void processFile_Intodb(QString filePath);
 	void fromdbToFile(QString filePath);
     void baseToTable();
-    //void statBarState();
 
 private slots:
 

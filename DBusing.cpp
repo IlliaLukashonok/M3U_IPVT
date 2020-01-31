@@ -1,20 +1,21 @@
 #include "DBusing.h"
-#include "windows.h"
 
 static QString startStr = nullptr;
 
 void openDB()//Как открывем базу
 {
-	db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("database.db3");
+    db = QSqlDatabase::addDatabase("QSQLITE");//Добавляем базу
+    db.setDatabaseName("database.db3");//Название базы
 
-	if (!db.open())
+    if (!db.open())//Проверка открытия
 	{
-			qDebug() << "Что-то не так с соединением!1";
+            qDebug() << "Что-то не так с соединением!1";//АЛЯРМА!!!
 	}
 
-    QSqlQuery *query = new QSqlQuery;
-
+    QSqlQuery *query = new QSqlQuery;//ИЧСХ - query
+    /*
+    Если нямае такой таблицы в базе - создаем.
+    */
     query->exec("CREATE TABLE IF NOT EXISTS `First` (\
 										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
 										   `Number` INTEGER,\
@@ -22,32 +23,36 @@ void openDB()//Как открывем базу
 										   `Gr`	TEXT NOT NULL,\
 										   `URL` TEXT NOT NULL\
 										   )");
-    delete query;
+    delete query;//ИЧСХ - удаляем query
 }
 
-void MainWindow::baseToTable()
+void MainWindow::baseToTable()//Визуализация базы в виджет таблицы
 {
-    QSqlQueryModel *model = new QSqlQueryModel;
-    QSqlQuery *query = new QSqlQuery(db);
+    QSqlTableModel *model = new QSqlTableModel(this);//Устанавливаем модель
+    model->setTable("First");//Имя тэйблы
+    model->setEditStrategy(QSqlTableModel::OnFieldChange);/*Политика записи значений в базу.
+    Еще не реализовано. Так, задел на будущее.
+    */
+    ui->tableDb->setModel(model);     // Устанавливаем модель на TableView
 
-    query->prepare("SELECT * FROM First");
-    query->exec();
+    ui->tableDb->setColumnHidden(0, true);    // Скрываем колонку с id записей
 
-    model->setQuery(*query);
+    model->select(); // Делаем выборку значений из таблиц
 
-    ui->tableDb->setModel(model);
+    // Устанавливаем размер колонок по содержимому
+    ui->tableDb->resizeColumnsToContents();
+    ui->tableDb->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableDb->horizontalHeader()->setStretchLastSection(true);
 
-    ui->statusBar->showMessage( tr("Table ready"), 2000 ); //Shit
-    //QDebug() << (model->rowCount());
+    ui->statusBar->showMessage( tr("Table ready"), 2000 ); //Shit. Все еще падла не работает
 }
 
-/*Обрабатывает базу в файл*/
-void MainWindow::processFile_Intodb(QString filePath)
+void MainWindow::processFile_Intodb(QString filePath)//Обрабатывает файл в базу
 {
 
-    ui->statusBar->showMessage( tr("Start"), 1000 );
-    QFile myFile (filePath);
-	myFile.open(QIODevice::ReadOnly);
+    ui->statusBar->showMessage( tr("Start"), 1000 ); //Shit №2
+    QFile myFile (filePath); //Устанавливаем что за файл
+    myFile.open(QIODevice::ReadOnly); //ИЧСХ - открываем файл
 
     QSqlQuery *query = new QSqlQuery;
 
@@ -57,38 +62,38 @@ void MainWindow::processFile_Intodb(QString filePath)
 						  QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes)
 		{
-        query->exec("DROP TABLE First");
+        query->exec("DROP TABLE First"); //Дропаем таблицу
         query->exec("CREATE TABLE `First` (\
 										   `ID`	INTEGER PRIMARY KEY AUTOINCREMENT,\
 										   `Number` INTEGER,\
 										   `Name`	TEXT NOT NULL,\
 										   `Gr`	TEXT NOT NULL,\
 										   `URL` TEXT NOT NULL\
-										   )");
+                                           )");//Пересоздаем таблицу
 		}
-    ui->statusBar->showMessage( tr("Base ready"), 1000 );
-    Sleep(1000);
-    ui->statusBar->showMessage( tr("Start processing file"), 2000);
-	int strNumber = 0; //Line number;                         x
-	int chanNumber = 0; //Channel number;                     y
-	int strChanNumber = 0; //Number of line in channel block; z
+    ui->statusBar->showMessage( tr("Base ready"), 1000 ); //Shit N3
+    ui->statusBar->showMessage( tr("Start processing file"), 2000); //Shit N4
 
-//	QString str = myFile.readLine();
+    int strNumber = 0; //Line number;                         x
+	int chanNumber = 0; //Channel number;                     y
+    int strChanNumber = 0; //Number of line in channel's block; z
+
 	QString str = nullptr;
 	QString chName = nullptr;
 	QString chGroup = nullptr;
 	QString chUrl = nullptr;
 	QString	strDb = nullptr;
 
-
-	while (!myFile.atEnd())
+    bool *flag = new bool(false);// Ну, надо (см. ниже)
+    while (!myFile.atEnd())//Бежим по файлу
 	{
+    *flag = false; //Возвращаем в исходное положение
 	str = myFile.readLine();
-	str = str.simplified();
+    str = str.simplified();//Выкидываем из линии все лишнее
 	if (str.contains("#EXTM3U")) //Если есть первая строка
 	{
 		startStr = str.remove("#EXTM3U");
-		startStr = startStr.remove("\r\n");
+        startStr = startStr.remove("\r\n");//Удаляем перевод каретки и сдвиг строки
 		strNumber++;
 	}
 
@@ -117,47 +122,72 @@ void MainWindow::processFile_Intodb(QString filePath)
 	strNumber++;
 	strChanNumber = 0;
 	}
+    else if ((!str.startsWith("0x0A") || !str.startsWith("\r") || !str.startsWith("\n")) && strNumber != 0)
+    {
+        QMessageBox *errorMessage = new QMessageBox;
+        errorMessage->setText("Я не умею реагировать на такую информацию)");
+        errorMessage->exec();
+        delete errorMessage;
+        QString strF =
+                  "INSERT INTO  First (Number, Name, Gr, URL) "
+                  "VALUES(%1, '%2', '%3', '%4');";//Загружаем ересь в базу
 
-	if (strChanNumber == 0 && chanNumber != 0)
+            strDb = strF.arg(strNumber)
+                      .arg("Ересь")
+                      .arg("Ересь")
+                      .arg("Ересь");
+        if (!query->exec(strDb)) //Проверочка
+        {
+            qDebug() << "Unable to do insert opeation";
+        }
+        strNumber++;
+        *flag =true;
+    }
+    // Вот сюда смотри-----------------------------|
+    //                                             V
+    if (strChanNumber == 0 && chanNumber != 0 && *flag != true) //Иначе считает что 1 строка - канал и загружает его
 	{
 		QString strF =
 				  "INSERT INTO  First (Number, Name, Gr, URL) "
-				  "VALUES(%1, '%2', '%3', '%4');";
+                  "VALUES(%1, '%2', '%3', '%4');";//Загружаем дату о канале в базу
 
 			strDb = strF.arg(chanNumber)
 					  .arg(chName)
 					  .arg(chGroup)
 					  .arg(chUrl);
-            if (!query->exec(strDb)) {
-				qDebug() << "Unable to do insert opeation";
-			}
-	}
+
+        if (!query->exec(strDb)) //Проверочка
+        {
+            qDebug() << "Unable to do insert opeation";
+        }
+    }
 
 	}
-    ui->statusBar->showMessage( tr("Processing end"), 1000 );
-    ui->statusBar->showMessage( tr("Base is fill"), 1000);
+    delete flag;
+    ui->statusBar->showMessage( tr("Processing end"), 1000 ); //Shit Nn
+    ui->statusBar->showMessage( tr("Base is fill"), 1000); //Shit Nn+1
 	myFile.close();
     delete query;
     baseToTable();
-    ui->statusBar->showMessage( tr("Ready"), 2000);
-//	ui->plainTextEdit->setPlainText("Finish");
+    ui->statusBar->showMessage( tr("Ready"), 2000); //Задолбался! Все стороки со статусбаром - криво работуещее дерьмо
 }
 
-void MainWindow::fromdbToFile(QString filePath)
+void MainWindow::fromdbToFile(QString filePath) //Превод даты из базы в файл
 {
-    QSqlQuery *query = new QSqlQuery;
+    QSqlQuery *query = new QSqlQuery; // -//-
 
     QFile myFile (filePath);
-	QTextStream stream;
+    QTextStream stream; //Создаем поток
 
 
 	myFile.open(QIODevice::WriteOnly);
 
 	stream.setDevice(&myFile); // Подключение потока к файлу
 
-	stream << "#EXTM3U" << startStr << "\r\n";
+    stream << "#EXTM3U" << startStr << "\r\n"; //Добавляем конец строки и переход
 
-    if (!query->exec("SELECT * FROM First;")) {
+    if (!query->exec("SELECT * FROM First;")) //Проверочка
+        {
 			qDebug() << "Unable to execute query - exiting";
 		}
 
@@ -170,16 +200,17 @@ void MainWindow::fromdbToFile(QString filePath)
 
     while (query->next())
 	{
+        //В срледующих 4 строках я сам не до конца разобрался
         chNumber = query->value(rec.indexOf("Number")).toString();
         chName  = query->value(rec.indexOf("Name")).toString();
         chGroup = query->value(rec.indexOf("Gr")).toString();
         chUrl = query->value(rec.indexOf("URL")).toString();
-        stream.setCodec("UTF-8");
-        stream.setGenerateByteOrderMark(false);
+        stream.setCodec("UTF-8"); //Ставим кодировку
+        stream.setGenerateByteOrderMark(false); //Не надо нам ваш BOM, или как его там
         stream << "#EXTINF:-1 tvg-chno=\"" <<  chNumber<< "\","
                << chName << "\n"
                << "#EXTGRP:" << chGroup << "\r\n"
-               <<  chUrl << "\r\n";
+               <<  chUrl << "\r\n"; //Выводим все разом в файл
 	}
 	myFile.close();
     delete query;
