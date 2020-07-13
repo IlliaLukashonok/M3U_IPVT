@@ -43,12 +43,11 @@ void MainWindow::on_actionSave_As_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-	QMessageBox::about(this, "About", "\
-Bielarus,   ____           ____    ________\n\
-Miensk,   /   /           /   /   /  _ ____/\n\
-_______   /   /          /   /   |  (___\n\
-______   /   /          /   /    \\___ \\\n\
-____    /   /______    /   /    ______)  |\n\
-___    /__________/   /___/    /________/\n");
+    QMessageBox::about(this, "About", "<img src=/logo.png>");
 }
 
+
+void MainWindow::on_refreshBtn_clicked()
+{
+    baseToTable();
+}

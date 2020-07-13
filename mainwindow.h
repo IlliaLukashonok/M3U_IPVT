@@ -27,6 +27,8 @@ private slots:
 
 	void on_actionAbout_triggered();
 
+    void on_refreshBtn_clicked();
+
 private:
 	Ui::MainWindow *ui;
 };

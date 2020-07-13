@@ -30,27 +30,24 @@ void MainWindow::baseToTable()//Визуализация базы в видже�
 {
     QSqlTableModel *model = new QSqlTableModel(this);//Устанавливаем модель
     model->setTable("First");//Имя тэйблы
-    model->setEditStrategy(QSqlTableModel::OnFieldChange);/*Политика записи значений в базу.
-    Еще не реализовано. Так, задел на будущее.
-    */
+    model->setEditStrategy(QSqlTableModel::OnFieldChange);//Метод обновления таблицы после редактирования
+    model->setSort(1, Qt::AscendingOrder);
+    model->select(); // Делаем выборку значений из таблиц
+
     ui->tableDb->setModel(model);     // Устанавливаем модель на TableView
 
     ui->tableDb->setColumnHidden(0, true);    // Скрываем колонку с id записей
-
-    model->select(); // Делаем выборку значений из таблиц
-
     // Устанавливаем размер колонок по содержимому
     ui->tableDb->resizeColumnsToContents();
-    ui->tableDb->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableDb->horizontalHeader()->setStretchLastSection(true);
 
-    ui->statusBar->showMessage( tr("Table ready"), 2000 ); //Shit. Все еще падла не работает
+    ui->statusBar->showMessage( tr("Table ready"), 2000 ); //Все еще  не работает
 }
 
 void MainWindow::processFile_Intodb(QString filePath)//Обрабатывает файл в базу
 {
 
-    ui->statusBar->showMessage( tr("Start"), 1000 ); //Shit №2
+    ui->statusBar->showMessage( tr("Start"), 1000 ); //№2
     QFile myFile (filePath); //Устанавливаем что за файл
     myFile.open(QIODevice::ReadOnly); //ИЧСХ - открываем файл
 
@@ -71,12 +68,12 @@ void MainWindow::processFile_Intodb(QString filePath)//Обрабатывает 
 										   `URL` TEXT NOT NULL\
                                            )");//Пересоздаем таблицу
 		}
-    ui->statusBar->showMessage( tr("Base ready"), 1000 ); //Shit N3
-    ui->statusBar->showMessage( tr("Start processing file"), 2000); //Shit N4
+    ui->statusBar->showMessage( tr("Base ready"), 1000 ); //N3
+    ui->statusBar->showMessage( tr("Start processing file"), 2000); //N4
 
-    int strNumber = 0; //Line number;                         x
-	int chanNumber = 0; //Channel number;                     y
-    int strChanNumber = 0; //Number of line in channel's block; z
+    int strNumber = 0; //Line number;                          x
+    int chanNumber = 0; //Channel number;                      y
+    int strChanNumber = 0; //Number of line in channel's block z
 
 	QString str = nullptr;
 	QString chName = nullptr;
@@ -85,57 +82,64 @@ void MainWindow::processFile_Intodb(QString filePath)//Обрабатывает 
 	QString	strDb = nullptr;
 
     bool *flag = new bool(false);// Ну, надо (см. ниже)
+
     while (!myFile.atEnd())//Бежим по файлу
 	{
     *flag = false; //Возвращаем в исходное положение
 	str = myFile.readLine();
     str = str.simplified();//Выкидываем из линии все лишнее
-	if (str.contains("#EXTM3U")) //Если есть первая строка
-	{
-		startStr = str.remove("#EXTM3U");
-        startStr = startStr.remove("\r\n");//Удаляем перевод каретки и сдвиг строки
-		strNumber++;
-	}
 
-	else if (str.contains("#EXTINF")) //Узнаем имя
-	{
-		int *pos = new int;
-		*pos = str.indexOf(',');
-		chName = str.remove(0, *pos + 1);
-		chName = chName.remove('\'');
-		delete pos;
-		strNumber++;
-		chanNumber++;
-		strChanNumber++;
-	}
-	else if (str.contains("#EXTGRP:"))
-	{
-		chGroup = str.remove("#EXTGRP:");
-		chGroup = chGroup.remove("\r\n");
-		strNumber++;
-		strChanNumber++;
-	}
-	else if (str.contains("http"))
-	{
-	chUrl = str;
-	chUrl = chUrl.remove("\r\n");
-	strNumber++;
-	strChanNumber = 0;
-	}
-    else if ((!str.startsWith("0x0A") || !str.startsWith("\r") || !str.startsWith("\n")) && strNumber != 0)
-    {
-        QMessageBox *errorMessage = new QMessageBox;
-        errorMessage->setText("Я не умею реагировать на такую информацию)");
-        errorMessage->exec();
-        delete errorMessage;
-        QString strF =
-                  "INSERT INTO  First (Number, Name, Gr, URL) "
-                  "VALUES(%1, '%2', '%3', '%4');";//Загружаем ересь в базу
+        if (str.contains("#EXTM3U")) //Если есть первая строка
+        {
+            startStr = str.remove("#EXTM3U");
+            startStr = startStr.remove("\r\n");//Удаляем перевод каретки и сдвиг строки
+            strNumber++;
+        }
 
-            strDb = strF.arg(strNumber)
-                      .arg("Ересь")
-                      .arg("Ересь")
-                      .arg("Ересь");
+        else if (str.contains("#EXTINF")) //Узнаем имя
+        {
+            int *pos = new int;
+            *pos = str.indexOf(',');
+            chName = str.remove(0, *pos + 1);
+            chName = chName.remove('\'');
+            delete pos;
+            strNumber++;
+            chanNumber++;
+            strChanNumber++;
+        }
+
+        else if (str.contains("#EXTGRP:"))
+        {
+            chGroup = str.remove("#EXTGRP:");
+            chGroup = chGroup.remove("\r\n");
+            strNumber++;
+            strChanNumber++;
+        }
+
+        else if (str.contains("http"))
+        {
+            chUrl = str;
+            chUrl = chUrl.remove("\r\n");
+            strNumber++;
+            strChanNumber = 0;
+        }
+
+        else if ((!str.startsWith("0x0A") || !str.startsWith("\r") || !str.startsWith("\n")) && strNumber != 0)
+        {
+            QMessageBox *errorMessage = new QMessageBox;
+            QString *errText = new QString ("Я не умею реагировать на такую информацию)\nString N" + QString::number(strNumber + 1));
+            errorMessage->setText(*errText);
+            errorMessage->exec();
+            delete errorMessage;
+            delete errText;
+            QString strF =
+                      "INSERT INTO  First (Number, Name, Gr, URL) "
+                      "VALUES(%1, '%2', '%3', '%4');";//Загружаем ересь в базу
+
+                strDb = strF.arg(strNumber+1)
+                          .arg("Ересь")
+                          .arg("Ересь")
+                          .arg("Ересь");
         if (!query->exec(strDb)) //Проверочка
         {
             qDebug() << "Unable to do insert opeation";
@@ -164,12 +168,12 @@ void MainWindow::processFile_Intodb(QString filePath)//Обрабатывает 
 
 	}
     delete flag;
-    ui->statusBar->showMessage( tr("Processing end"), 1000 ); //Shit Nn
-    ui->statusBar->showMessage( tr("Base is fill"), 1000); //Shit Nn+1
+    ui->statusBar->showMessage( tr("Processing end"), 1000 ); //Nn
+    ui->statusBar->showMessage( tr("Base is fill"), 1000); //Nn+1
 	myFile.close();
     delete query;
     baseToTable();
-    ui->statusBar->showMessage( tr("Ready"), 2000); //Задолбался! Все стороки со статусбаром - криво работуещее дерьмо
+    ui->statusBar->showMessage( tr("Ready"), 2000); //Задолбался! Все стороки со статусбаром - криво НЕработуещее дерьмо
 }
 
 void MainWindow::fromdbToFile(QString filePath) //Превод даты из базы в файл
@@ -200,7 +204,7 @@ void MainWindow::fromdbToFile(QString filePath) //Превод даты из б�
 
     while (query->next())
 	{
-        //В срледующих 4 строках я сам не до конца разобрался
+        //В следующих 4 строках я сам не до конца разобрался
         chNumber = query->value(rec.indexOf("Number")).toString();
         chName  = query->value(rec.indexOf("Name")).toString();
         chGroup = query->value(rec.indexOf("Gr")).toString();
