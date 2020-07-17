@@ -1,0 +1,5 @@
+IDI_ICON1   ICON    DISCARDABLE "icon.ico"
+
+#include <windows.h>
+#include "version.h"
+

@@ -101,8 +101,8 @@
      <string/>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>Refresh-icon.png</normaloff>Refresh-icon.png</iconset>
+     <iconset resource="res.qrc">
+      <normaloff>:/btns/refr.ico</normaloff>:/btns/refr.ico</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -121,7 +121,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -163,6 +163,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
